@@ -14,6 +14,7 @@ shot_sprite = pygame.image.load("assets/shot_plain.png").convert_alpha()
 active_player_shots = []
 
 #functions
+
 def display_sprite(x, y, sprite, angel, sprite_rect=False):
     rotated_sprite = pygame.transform.rotate(sprite, angel)
     if sprite_rect:
@@ -25,32 +26,28 @@ def display_sprite(x, y, sprite, angel, sprite_rect=False):
 
 
 def fire_shot(location, angle, sprite=shot_sprite):
-    shot = fun.Shot(location, angle, sprite)
+    shot = fun.Shot(location, sprite, angle)
     active_player_shots.append(shot)
 
+ship_rect = ship_sprite.get_rect(center=(400,300))
+ship = fun.Player_char((400,300), ship_sprite, rect=ship_rect)
+#ship_positon = pygame.Vector2(400, 300)
 
-
-ship_positon = pygame.Vector2(400, 300)
-ship_rect = ship_sprite.get_rect(center=(ship_positon))
 shot_colldown = 0
 clock = pygame.time.Clock()
 
-player_angle = 0
-player_speed = 0
-player_speed_limit = 15
 
 running = True
 while running:
     #boarders
-    if ship_positon.x > 1290:
-        ship_positon.x = -10
-    if ship_positon.x < -10:
-        ship_positon.x = 1290
-    if ship_positon.y > 730:
-        ship_positon.y = -10
-    if ship_positon.y < -10:
-        ship_positon.y = 730
-
+    if ship.x > 1290:
+        ship.x = -10
+    if ship.x < -10:
+        ship.x = 1290
+    if ship.y > 730:
+        ship.y = -10
+    if ship.y < -10:
+        ship.y = 730
 
     #cool downs
     if shot_colldown > 0:
@@ -59,7 +56,7 @@ while running:
 
     #draw frame
     screen.fill((0,0,0))
-    display_sprite(ship_positon.x, ship_positon.y, ship_sprite, player_angle, sprite_rect=ship_rect)
+    display_sprite(ship.x, ship.y, ship.sprite, ship.angle, ship.rect)
     for shot in active_player_shots:
         display_sprite(shot.x, shot.y, shot_sprite,shot.angle)
 
@@ -69,41 +66,31 @@ while running:
     # Inputs
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
-        player_angle +=3
+        ship.angle +=3
     if keys[pygame.K_RIGHT]:
-        player_angle -=3
+        ship.angle -=3
     if keys[pygame.K_UP]:
-        player_speed += .3
-    if keys[pygame.K_DOWN] and player_speed > 0:
-        player_speed -= .1
+        ship.speed += .3
+    if keys[pygame.K_DOWN] and ship.speed > 0:
+        ship.speed -= .1
     if keys[pygame.K_SPACE] and shot_colldown <= 0:
-        fire_shot((ship_positon.x,ship_positon.y),player_angle)
+        fire_shot((ship.x,ship.y),ship.angle)
         shot_colldown = .2 * 60
 
-
-    #Shots
+    #Update object locations
     for shot in active_player_shots:
         shot.update_location()
-
-
-    ship_positon.x, ship_positon.y = fun.calculate_trajectory(ship_positon.x, ship_positon.y, ((360 - player_angle) % 360) + 270, player_speed)
-
+    ship.update_location()
 
     #push to sceen
     pygame.display.flip()
     clock.tick(60)
 
     #Gravity and speed control / limits
-    if player_speed > player_speed_limit:
-        player_speed = player_speed_limit
-    if player_speed > 0:
-        player_speed -= .06
-    elif player_speed < 0:
-        player_speed = 0
-
-    # Angle control
-    if player_angle >= 360:
-        player_angle = 0
+    ship.enforce_drag()
+    ship.enforce_speed_limit()
+    ship.enforce_angle_limit()
+    #print(f"Speed: {ship.speed}\nAngle: {ship.angle}")
 
 
 pygame.quit()

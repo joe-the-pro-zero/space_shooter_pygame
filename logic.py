@@ -15,6 +15,7 @@ class Display_obj():
         self.speed_limit = speed_limit
         self.speed = 0
         self.angle = angle
+        self.status = "ACTIVE"
     def update_location(self):
         self.x, self.y = calculate_trajectory(self.x, self.y, ((360 - self.angle) % 360) + 270, self.speed)
     def enforce_speed_limit(self):
@@ -35,7 +36,26 @@ class Shot(Display_obj):
     def __init__(self,location ,sprite, angle):
         super().__init__(location,sprite,angle=angle)
         self.speed = 20
+    def enforce_boarder_limit(self):
+        #boarders
+        if self.x > 1290:
+            self.status = "COLLECT"
+        if self.x < -10:
+            self.status = "COLLECT"
+        if self.y > 730:
+            self.status = "COLLECT"
+        if self.y < -10:
+            self.status = "COLLECT"
 
 class Player_char(Display_obj):
     def __init__(self, location, sprite, rect=False, speed_limit=15):
         super().__init__(location, sprite, rect=rect, speed_limit=speed_limit)
+    def enforce_boarder_loop(self):
+        if self.x > 1290:
+            self.x = -10
+        if self.x < -10:
+            self.x = 1290
+        if self.y > 730:
+            self.y = -10
+        if self.y < -10:
+            self.y = 730

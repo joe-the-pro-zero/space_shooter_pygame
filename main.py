@@ -1,5 +1,5 @@
 import pygame
-import fun
+import logic
 
 pygame.init()
 
@@ -26,11 +26,11 @@ def display_sprite(x, y, sprite, angel, sprite_rect=False):
 
 
 def fire_shot(location, angle, sprite=shot_sprite):
-    shot = fun.Shot(location, sprite, angle)
+    shot = logic.Shot(location, sprite, angle)
     active_player_shots.append(shot)
 
 ship_rect = ship_sprite.get_rect(center=(400,300))
-ship = fun.Player_char((400,300), ship_sprite, rect=ship_rect)
+ship = logic.Player_char((400,300), ship_sprite, rect=ship_rect)
 #ship_positon = pygame.Vector2(400, 300)
 
 shot_colldown = 0
@@ -39,15 +39,6 @@ clock = pygame.time.Clock()
 
 running = True
 while running:
-    #boarders
-    if ship.x > 1290:
-        ship.x = -10
-    if ship.x < -10:
-        ship.x = 1290
-    if ship.y > 730:
-        ship.y = -10
-    if ship.y < -10:
-        ship.y = 730
 
     #cool downs
     if shot_colldown > 0:
@@ -58,6 +49,8 @@ while running:
     screen.fill((0,0,0))
     display_sprite(ship.x, ship.y, ship.sprite, ship.angle, ship.rect)
     for shot in active_player_shots:
+        if shot.status == "COLLECT":
+            active_player_shots.remove(shot)
         display_sprite(shot.x, shot.y, shot_sprite,shot.angle)
 
     for event in pygame.event.get():
@@ -86,10 +79,13 @@ while running:
     pygame.display.flip()
     clock.tick(60)
 
-    #Gravity and speed control / limits
+    #Gravity / speed control / limits
     ship.enforce_drag()
     ship.enforce_speed_limit()
     ship.enforce_angle_limit()
+    ship.enforce_boarder_loop()
+    for shot in active_player_shots:
+        shot.enforce_boarder_limit()
     #print(f"Speed: {ship.speed}\nAngle: {ship.angle}")
 
 

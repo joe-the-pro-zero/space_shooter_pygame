@@ -31,7 +31,8 @@ for filex in alphabet_files:
 #Object
 active_objects = {"active_player_shots":[],
                   "active_enemys":[],
-                  "active_players":[]
+                  "active_players":[],
+                  "letters":[]
                       }
 
 #functions
@@ -40,9 +41,8 @@ def screen_print(x, y, string, scale=1):
         char_sprite = pygame.transform.scale(alpha_sprites[char],
                                     (alpha_sprites[char].get_width() * scale,
                                     alpha_sprites[char].get_height() * scale))
-        display_sprite(x,y,char_sprite,0)
+        active_objects["letters"].append(logic.Letter((x,y),char_sprite))
         x = x + 16 * scale
-
 
 def display_sprite(x, y, sprite, angel, sprite_rect=False):
     rotated_sprite = pygame.transform.rotate(sprite, angel)
@@ -66,8 +66,11 @@ def collison_detect():
     for ship in active_objects["active_players"]:
         for enemy in active_objects["active_enemys"]:
             if round(ship.y) in range(round(enemy.y-32), round(enemy.y+32)) and round(ship.x) in range(round(enemy.x-32), round(enemy.x+32)):
-                pass
-                #gameover()
+                ship.status = "COLLECT"
+                for key in active_objects:
+                    for obj in active_objects[key]:
+                        obj.status = "COLLECT"
+                screen_print(360,200,"GAMEOVER",4)
 
 def move_enemy():
     pass
@@ -93,14 +96,12 @@ while running:
 
     #draw frame
     screen.fill((0,0,0))
-    screen_print(200,200,"GAME",4)
 
 
     for key in active_objects:
         for obj in active_objects[key]:
             if obj.status == "ACTIVE":
-                pass
-            display_sprite(obj.x, obj.y, obj.sprite, obj.angle, obj.rect)
+                display_sprite(obj.x, obj.y, obj.sprite, obj.angle, obj.rect)
 
     #remove trash
     for key in active_objects:

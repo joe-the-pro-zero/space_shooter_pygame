@@ -70,4 +70,7 @@ class Enemy(Display_obj):
         super().__init__(location, sprite, angle=angle)
         self.size = (48, 48)
 
+class Letter(Display_obj):
+    def __init__(self, location,sprite, angle=0):
+        super().__init__(location, sprite, angle=angle)
 
